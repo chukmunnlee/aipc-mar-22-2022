@@ -11,12 +11,22 @@ resource docker_image dov-bear {
 
 // container
 resource docker_container dov-bear-container {
-    name = "dov"
+    count = 3
+    name = "dov-${count.index}"
     image = docker_image.dov-bear.latest
     ports {
         internal = 3000
         //external = 8080
     }
+}
+
+output dov-names {
+    value = docker_container.dov-bear-container[*].name
+}
+
+output external-ports {
+    //value = docker_container.dov-bear-container[*].ports[*].external
+    value = join(",", [ for p in docker_container.dov-bear-container[*].ports[*]: element(p, 0).external ])
 }
 
 output chuk_fingerprint {

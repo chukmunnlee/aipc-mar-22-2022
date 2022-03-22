@@ -40,7 +40,7 @@ resource local_file root_at_ip {
 }
 
 // Step 3 Provision a droplet
-resource digitalocean_droplet ngnix {
+resource digitalocean_droplet nginx {
     name = "nginx"
     image = var.droplet_image
     region = var.droplet_region
@@ -50,7 +50,7 @@ resource digitalocean_droplet ngnix {
     connection {
         type = "ssh"
         user = "root"
-        host = self.nginx.ipv4_address
+        host = self.ipv4_address
         private_key = file(var.private_key)
     }
 
@@ -65,16 +65,15 @@ resource digitalocean_droplet ngnix {
     // Copy config file over
     provisioner file {
         source = "./nginx.conf"
-        destination = "/etc/nginx"
+        destination = "/etc/nginx/nginx.conf"
     }
 
     // Restart nginx cause we have updated the configuration
     provisioner remote-exec {
         inline = [
-            "systemctl restart nginx"
+            "systemctl reload nginx"
         ]
     }
-    
 }
 
 output external-ports {

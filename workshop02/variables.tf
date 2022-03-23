@@ -9,6 +9,11 @@ variable private_key {
     sensitive = true
 }
 
+variable code_server_password {
+    type = string
+    sensitive = true
+}
+
 variable droplet_size {
     type = string
     default = "s-1vcpu-2gb"

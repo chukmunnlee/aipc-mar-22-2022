@@ -1,0 +1,50 @@
+- name: Connectivity test
+  hosts: all
+  tasks:
+  - name: Ping the server
+    ping:
+
+- name: Setup code-server
+  hosts: all
+  vars:
+    cs_url: https://github.com/coder/code-server/releases/download/v4.2.0/code-server-4.2.0-linux-amd64.tar.gz
+  tasks:
+  - name: Create required directory
+    file:
+      name: /usr/local/opt
+      state: directory
+      mode: '0755'
+    loop:
+    - /usr/local/opt
+    - /var/lib/code-server
+  - name: Check if the file tarball exists
+    stat:
+      path: /usr/local/opt/code-server-4.2.0-linux-amd64
+    register: cs_tarball
+  - name: Download tarball and unarchive
+    unarchive:
+      src: "{{ cs_url }}"
+      dest: /usr/local/opt
+      remote_src: yes
+    when: not cs_tarball.stat.exists 
+  - name: Copy the contents from /usr/local/opt to /usr/lib/code-server
+    copy:
+      src: /usr/local/opt/code-server-4.2.0-linux-amd64/
+      dest: /usr/lib/code-server/
+      force: no
+      remote_src: yes
+  - name: Link code-server binary to /usr/bin
+    file:
+      src: /usr/lib/code-server/bin/code-server
+      dest: /usr/bin/code-server
+      state: link
+  - name: Generate code-server.service file
+    template:
+      src: code-server.service.j2
+      dest: /lib/systemd/system/code-server.service
+  - name: Start and enable code-server.service
+    systemd:
+      name: code-server
+      daemon_reload: true
+      enabled: true
+      state: started

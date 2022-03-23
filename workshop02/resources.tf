@@ -15,6 +15,8 @@ resource local_file inventory_yaml {
         code_server = digitalocean_droplet.code-server.name
         code_server_ip = digitalocean_droplet.code-server.ipv4_address
         private_key = var.private_key
+        code_server_password = var.code_server_password
+        code_server_domain = "code-${digitalocean_droplet.code-server.ipv4_address}.nip.io"
     })
     file_permission = "0644"
 }

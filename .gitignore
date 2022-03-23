@@ -1,3 +1,5 @@
 terraform.tfvars
 .*terraform*
 *.tfstate*
+root@*
+inventory.yaml

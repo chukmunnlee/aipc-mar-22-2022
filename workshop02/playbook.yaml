@@ -7,29 +7,32 @@
 - name: Setup code-server
   hosts: all
   vars:
-    cs_url: https://github.com/coder/code-server/releases/download/v4.2.0/code-server-4.2.0-linux-amd64.tar.gz
+    install_dir: /usr/local/opt
+    cs: "code-server-4.2.0-linux-amd64"
+    cs_url: "https://github.com/coder/code-server/releases/download/v4.2.0/{{ cs }}.tar.gz"
+    cs_dir: "{{ install_dir }}/{{ cs }}"
   tasks:
   - name: Create required directory
     file:
-      name: /usr/local/opt
+      name: "{{ item }}"
       state: directory
       mode: '0755'
     loop:
-    - /usr/local/opt
+    - "{{ install_dir }}"
     - /var/lib/code-server
   - name: Check if the file tarball exists
     stat:
-      path: /usr/local/opt/code-server-4.2.0-linux-amd64
+      path: "{{ cs_dir }}"
     register: cs_tarball
   - name: Download tarball and unarchive
     unarchive:
       src: "{{ cs_url }}"
-      dest: /usr/local/opt
+      dest: "{{ cs_dir }}"
       remote_src: yes
     when: not cs_tarball.stat.exists 
   - name: Copy the contents from /usr/local/opt to /usr/lib/code-server
     copy:
-      src: /usr/local/opt/code-server-4.2.0-linux-amd64/
+      src: "{{ cs_dir }}/"
       dest: /usr/lib/code-server/
       force: no
       remote_src: yes
@@ -47,4 +50,4 @@
       name: code-server
       daemon_reload: true
       enabled: true
-      state: started
+      state: restarted

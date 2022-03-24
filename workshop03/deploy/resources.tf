@@ -1,4 +1,4 @@
-local {
+locals {
     cs_domain = "${var.CF_subdomain}.${var.CF_domain}"
 }
 data digitalocean_ssh_key chuk {

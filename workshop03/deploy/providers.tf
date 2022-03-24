@@ -13,6 +13,10 @@ terraform {
             source = "cloudflare/cloudflare"
             version = "3.11.0"
         }
+        acme = {
+            source  = "vancluever/acme"
+            version = "2.8.0"
+        }
     }
 }
 
@@ -22,5 +26,8 @@ provider "digitalocean" {
 provider "cloudflare" {
     email = var.CF_email
     api_token = var.CF_api_token
+}
+provider "acme" {
+    server_url = "https://acme-staging-v02.api.letsencrypt.org/directory"
 }
 provider "local" { }

@@ -27,7 +27,7 @@
   - name: Download tarball and unarchive
     unarchive:
       src: "{{ cs_url }}"
-      dest: "{{ cs_dir }}"
+      dest: "{{ install_dir }}"
       remote_src: yes
     when: not cs_tarball.stat.exists 
   - name: Copy the contents from /usr/local/opt to /usr/lib/code-server

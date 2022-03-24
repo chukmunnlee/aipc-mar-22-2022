@@ -44,8 +44,12 @@ variable code_server_version {
     default = "4.2.0"
 }
 
-variable code_server_domain {
+variable CF_domain {
     type = string
+}
+variable CF_subdomain {
+    type = string
+    default = "codeserver"
 }
 
 variable code_server_password {

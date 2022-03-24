@@ -1,0 +1,78 @@
+- name: Connectivity test
+  hosts: all
+  tasks:
+  - name: Ping the server
+    ping:
+
+- name: Setup code-server
+  hosts: all
+  vars:
+    install_dir: /usr/local/opt
+    cs: "code-server-{{ code_server_version }}-linux-amd64"
+    cs_url: "https://github.com/coder/code-server/releases/download/v{{ code_server_version }}/{{ cs }}.tar.gz"
+    cs_dir: "{{ install_dir }}/{{ cs }}"
+
+  tasks:
+  - name: Create required directory
+    file:
+      name: "{{ item }}"
+      state: directory
+      mode: '0755'
+    loop:
+    - "{{ install_dir }}"
+    - /var/lib/code-server
+  - name: Check if the file tarball exists
+    stat:
+      path: "{{ cs_dir }}"
+    register: cs_tarball
+  - name: Download tarball and unarchive
+    unarchive:
+      src: "{{ cs_url }}"
+      dest: "{{ install_dir }}"
+      remote_src: yes
+    when: not cs_tarball.stat.exists 
+  - name: Copy the contents from /usr/local/opt to /usr/lib/code-server
+    copy:
+      src: "{{ cs_dir }}/"
+      dest: /usr/lib/code-server/
+      force: yes
+      remote_src: yes
+  - name: Link code-server binary to /usr/bin
+    file:
+      src: /usr/lib/code-server/bin/code-server
+      dest: /usr/bin/code-server
+      state: link
+  - name: Copy code-server.service file
+    copy:
+      src: code-server.service
+      dest: /lib/systemd/system/code-server.service
+  - name: Start and enable code-server.service
+    systemd:
+      name: code-server
+      daemon_reload: true
+      enabled: true
+      state: restarted
+
+- name: Install Nginx
+  hosts: all
+  tasks:
+  - name: Install nginx
+    apt:
+      name: nginx
+      update_cache: yes
+      state: latest
+  - name: Generate code-server nginx configuration
+    copy:
+      src: code-server.conf
+      dest: /etc/nginx/sites-available/code-server.conf
+  - name: Link code-server.conf to sites-enabled
+    file:
+      src: /etc/nginx/sites-available/code-server.conf
+      dest: /etc/nginx/sites-enabled/code-server.conf
+      state: link
+  - name: Start and enable nginx
+    systemd:
+      name: nginx
+      daemon_reload: true
+      enabled: true
+      state: restarted

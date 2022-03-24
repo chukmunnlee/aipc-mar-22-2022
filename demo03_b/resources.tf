@@ -1,3 +1,8 @@
+ data digitalocean_ssh_key chuk {
+    # resource name on digitalocean
+    name = "chuk"
+}
+
 resource local_file root_at_ip {
     filename = "root@${digitalocean_droplet.nginx.ipv4_address}"
     content = ""
